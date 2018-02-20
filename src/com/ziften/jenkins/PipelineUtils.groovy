@@ -26,10 +26,12 @@ def setGitEnvVars() {
 
 def containerBuildPub(List<Map> argsList) {
     for(Map args : argsList) {
-        println "Running Docker build/publish: ${args.host}/${args.repo}:${args.tags}"
+        println "Running Docker build/publish: ${args.image}:${args.tags}"
 
-        docker.withRegistry("https://${args.host}", "${args.auth_id}") {
-
+        docker.withRegistry("https://${args.container_reg.host}", "${args.container_reg.jenkins_creds_id}") {
+            def img = docker.image("${args.image}")
+            sh "docker build --build-arg VCS_REF=${env.GIT_SHA} --build-arg BUILD_DATE=`date -u +'%Y-%m-%dT%H:%M:%SZ'` -t ${args.image} ${args.dockerfile}"
+            return img.id
         }
     }
 }
