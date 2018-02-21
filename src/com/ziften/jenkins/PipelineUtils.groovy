@@ -102,6 +102,8 @@ def helmConfig() {
     //setup helm connectivity to Kubernetes API and Tiller
     println "initiliazing helm client"
     sh "helm init"
+    sh "helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/"
+    sh "helm repo add stable https://kubernetes-charts.storage.googleapis.com"
     println "checking client/server version"
     sh "helm version"
 }
