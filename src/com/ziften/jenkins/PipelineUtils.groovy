@@ -62,7 +62,7 @@ def getContainerTags(config, List tags = []) {
     try {
         // if branch available, use as prefix, otherwise only commit hash
         if (env.BRANCH_NAME) {
-            commit_tag = env.BRANCH_NAME + '-' + env.GIT_COMMIT_ID.substring(0, 7)
+            commit_tag = env.BRANCH_NAME.replace('/', '-') + '-' + env.GIT_COMMIT_ID.substring(0, 7)
         } else {
             commit_tag = env.GIT_COMMIT_ID.substring(0, 7)
         }
