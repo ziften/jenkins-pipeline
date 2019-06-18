@@ -153,3 +153,8 @@ def getPersistentVar(name) {
 
     readJSON(file: STORAGE_FILE_PATH)[name]
 }
+
+@NonCPS
+def jobDuration(name) {
+    jenkins.model.Jenkins.instance.getItem(name).getEstimatedDuration()
+}
