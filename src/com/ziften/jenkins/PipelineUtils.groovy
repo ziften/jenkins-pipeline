@@ -1,8 +1,6 @@
 #!/usr/bin/groovy
 package com.ziften.jenkins
 
-import static Constants.*
-
 def setGitEnvVars() {
     println "Setting env vars to tag containers"
 
@@ -138,20 +136,6 @@ def helmDeploy(Map args) {
 
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }
-}
-
-def setPersistentVar(name, value) {
-    def storage = (fileExists(STORAGE_FILE_PATH)) ? readJSON(file: STORAGE_FILE_PATH) : readJSON(text: '{}')
-    storage[name] = value
-    writeJSON(file: STORAGE_FILE_PATH, json: storage)
-
-    stash(name: "global-storage-stash", includes: STORAGE_FILE_PATH)
-}
-
-def getPersistentVar(name) {
-    unstash(name: "global-storage-stash")
-
-    readJSON(file: STORAGE_FILE_PATH)[name]
 }
 
 @NonCPS
