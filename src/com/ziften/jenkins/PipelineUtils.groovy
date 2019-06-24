@@ -139,6 +139,17 @@ def helmDeploy(Map args) {
 }
 
 @NonCPS
-def jobDuration(name) {
+def jobDuration(String name) {
     jenkins.model.Jenkins.instance.getItem(name).getEstimatedDuration()
+}
+
+@NonCPS
+def getSuccessfulBuildNumberByFilter(Map filter, String jobName) {
+    def allBuilds = jenkins.model.Jenkins.instance.getItem(jobName).builds
+    def build = allBuilds.find {
+        it.buildVariableResolver.resolve(filter.parameterName) == filter.parameterValue &&
+                it.result == hudson.model.Result.SUCCESS
+    }
+
+    build ? build.number : -1
 }
