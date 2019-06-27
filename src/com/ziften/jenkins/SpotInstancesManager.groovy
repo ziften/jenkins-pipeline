@@ -10,7 +10,7 @@ class SpotInstancesManager {
     def createMany(number) {
         def hosts = prepareInstances(number)
 
-        fixDeadInstances(hosts)
+//        fixDeadInstances(hosts)
 
         hosts.collect { wrapInstance(getLocalIp(it), getExternalIp(it), it) }
     }

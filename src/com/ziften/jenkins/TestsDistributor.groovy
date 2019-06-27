@@ -1,25 +1,52 @@
 package com.ziften.jenkins
 
+@Grab('com.google.guava:guava:24.1-jre')
+import com.google.common.collect.Sets
+
 class TestsDistributor {
     private def tests
     private def result
-    private def longestTest
     private def utils
 
-    final DEVIATION = 10
+    final DEVIATION_MSEC = 100000
+
+    TestsDistributor() {
+        this.utils = new PipelineUtils()
+    }
 
     @NonCPS
-    def run(tests) {
-        this.utils = new PipelineUtils()
-        this.tests = jobsWithDuration(tests)
+    def groupByDuration(jobs) {
+        this.tests = jobsWithDuration(jobs)
         this.result = []
-        this.longestTest = longestTest()
+
+        def longestTest = longestTest()
 
         addChunk([longestTest])
 
-        while (!this.tests.isEmpty()) {
-            def combinations = allCombinations(this.tests)
-            def chunk = pickBest(combinations)
+        while (!tests.isEmpty()) {
+            def combinations = allCombinations(tests).findAll {
+                totalDuration(it) <= longestTest.duration + DEVIATION_MSEC
+            }
+            def chunk = pickBest(combinations, longestTest.duration)
+            addChunk(chunk)
+        }
+
+        result
+    }
+
+    def groupByInstances(jobs, instancesNumber) {
+        this.tests = jobsWithDuration(jobs)
+        this.result = []
+
+        instancesNumber.times { idx ->
+            if (idx + 1 == instancesNumber) {
+                addChunk(tests)
+                return
+            }
+
+            def reference = averageChunkDuration(instancesNumber - idx)
+            def combinations = allCombinations(tests)
+            def chunk = pickBest(combinations, reference)
             addChunk(chunk)
         }
 
@@ -28,30 +55,17 @@ class TestsDistributor {
 
     @NonCPS
     private def allCombinations(tests) {
-        (1..(tests.size())).inject([]) { list, i ->
-            list + comb(i, tests as List)
-        }.collect { it as LinkedHashSet } as LinkedHashSet
+        Sets.powerSet(tests.toSet()).toList()[1..-1]
     }
 
     @NonCPS
-    private def comb(m, list) {
-        def n = list.size()
-        m == 0 ?
-                [[]] :
-                (0..(n - m)).inject([]) { newlist, k ->
-                    def sublist = (k + 1 == n) ? [] : list[(k + 1)..<n]
-                    newlist + comb(m - 1, sublist).collect { [list[k]] + it }
-                }.findAll { totalDuration(it) <= longestTest.duration + DEVIATION }
+    private def pickBest(combinations, reference) {
+        combinations.min { deviationFromReference(it, reference) }
     }
 
     @NonCPS
-    private def pickBest(combinations) {
-        combinations.min { deviationFromLongest(it) }
-    }
-
-    @NonCPS
-    private def deviationFromLongest(combination) {
-        (totalDuration(combination) - longestTest.duration).abs()
+    private def deviationFromReference(combination, reference) {
+        (totalDuration(combination) - reference).abs()
     }
 
     @NonCPS
@@ -83,5 +97,11 @@ class TestsDistributor {
     @NonCPS
     private def jobWithDuration(name) {
         [name: name, duration: utils.jobDuration(name)]
+    }
+
+    @NonCPS
+    private def averageChunkDuration(chunksNumber) {
+        def avg = totalDuration(tests)/chunksNumber.toFloat()
+        avg.round()
     }
 }
