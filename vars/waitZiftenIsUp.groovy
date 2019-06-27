@@ -1,5 +1,5 @@
 def call(... ips) {
-    def ipsStr = ips.join(',')
+    def ipsStr = ips.flatten().join(',')
 
     withEnv(["COMA_SEPARATED_IPS=${ipsStr}"]) {
         steps.sh('''\
@@ -34,7 +34,7 @@ def call(... ips) {
             export -f wait_ziften_is_up
             
             ips=${COMA_SEPARATED_IPS//,/ }
-            parallel -0 wait_ziften_is_up ::: $ips
+            parallel -j0 -0 wait_ziften_is_up ::: $ips
         '''.stripIndent())
     }
 }

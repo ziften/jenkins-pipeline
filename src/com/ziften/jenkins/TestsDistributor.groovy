@@ -8,7 +8,7 @@ class TestsDistributor {
     private def result
     private def utils
 
-    final DEVIATION_MSEC = 100000
+    final DEVIATION_MSEC = 30000
 
     TestsDistributor() {
         this.utils = new PipelineUtils()

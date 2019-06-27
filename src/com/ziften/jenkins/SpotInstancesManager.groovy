@@ -16,24 +16,12 @@ class SpotInstancesManager {
     }
 
     def destroyMany(instances) {
-        def instancesToCollectFrom = instances.findAll { it.collectLogs }*.instance
-        collectLogsFromMany(instancesToCollectFrom)
-
-        def hosts = instances*.instance*.hostname
+        def hosts = instances*.hostname
         destroyInstances(hosts)
-
-        if (instancesToCollectFrom) {
-            steps.archiveArtifacts('ziften_*.log')
-            steps.sh('rm -f ziften_*.log')
-        }
     }
 
     def createOne() {
         createMany(1).first()
-    }
-
-    def destroyOne(instance) {
-        destroyMany([instance])
     }
 
     def collectLogsFromMany(instances) {
