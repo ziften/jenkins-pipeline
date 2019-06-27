@@ -8,10 +8,9 @@ class SpotInstancesManager {
     }
 
     def createMany(number) {
-        def hosts = generateHosts(number)
+        def hosts = prepareInstances(number)
 
-        provisionInstances(hosts)
-        initializeInstances(hosts)
+        fixDeadInstances(hosts)
 
         hosts.collect { wrapInstance(getLocalIp(it), getExternalIp(it), it) }
     }
@@ -65,6 +64,37 @@ class SpotInstancesManager {
 
     private def generateUUID() {
         UUID.randomUUID().toString()
+    }
+
+    private def prepareInstances(number) {
+        def hosts = generateHosts(number)
+
+        provisionInstances(hosts)
+        initializeInstances(hosts)
+
+        hosts
+    }
+
+    private fixDeadInstances(hosts) {
+        def deadHosts = selectDeadHosts(hosts)
+
+        if (deadHosts) {
+            steps.echo "Found ${deadHosts.size()} dead instances. Replacing them with new..."
+            replaceDeadInstances(hosts, deadHosts)
+        }
+    }
+
+    private def selectDeadHosts(hosts) {
+        hosts.findAll { host ->
+            !(getLocalIp(host) ==~ /172\.\d{1,3}\.\d{1,3}\.\d{1,3}/)
+        }
+    }
+
+    private def replaceDeadInstances(allHosts, deadHosts) {
+        allHosts.removeAll(deadHosts)
+
+        def newHosts = prepareInstances(deadHosts.size())
+        allHosts.addAll(newHosts)
     }
 
     private def provisionInstances(hostnames) {
