@@ -25,14 +25,22 @@ class SpotInstancesManager {
     }
 
     def collectLogsFromMany(instances) {
-        instances.each { collectLogs(it) }
+        collectFileFromMany(instances, '/var/log/ziften.log')
     }
 
-    def collectLogs(instance) {
+    def collectFileFromMany(instances, filepath) {
+        instances.each { collectFile(filepath, it) }
+    }
+
+    def collectFile(filepath, instance) {
         steps.sh("""\
             #!/bin/bash
-            echo "Pulling logs from server: ${instance.externalIp}"
-            scp -i /etc/salt/qa.pem -o StrictHostKeyChecking=no root@${instance.localIp}:/var/log/ziften.log ${steps.env.WORKSPACE}/ziften_${instance.externalIp}.log
+            filename_with_ext=\$(basename ${filepath})
+            filename="\${filename_with_ext%.*}"
+            extension="\${filename_with_ext##*.}"
+            
+            echo "Pulling file from server: ${instance.externalIp}"
+            scp -i /etc/salt/qa.pem -o StrictHostKeyChecking=no root@${instance.localIp}:${filepath} ${steps.env.WORKSPACE}/\${filename}_${instance.externalIp}.\${extension}
         """.stripIndent())
     }
 
@@ -86,15 +94,11 @@ class SpotInstancesManager {
     }
 
     private def provisionInstances(hostnames) {
-        def hostnamesStr = hostnames.join(' ')
-
-        steps.sh("salt-cloud -P -p dev-pipe-spot ${hostnamesStr}")
+        steps.sh("salt-cloud -P -p dev-pipe-spot ${hostnames.join(' ')}")
     }
 
     private def initializeInstances(hostnames) {
-        def hostnamesStr = hostnames.join(',')
-
-        steps.sh("salt -L '${hostnamesStr}' state.highstate saltenv=dev-pipe-spot")
+        steps.sh("salt -L '${hostnames.join(',')}' state.highstate saltenv=dev-pipe-spot")
     }
 
     private def getLocalIp(hostname) {

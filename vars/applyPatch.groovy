@@ -15,13 +15,12 @@ def call(Map opts, ... instances) {
                 salt -L $HOSTS -t 1500 state.sls server_patches.$PATCH_BASE_FOLDER.$(echo $FINAL_PATCH|sed 's/\\.sls//')
             '''.stripIndent())
             if (opts.startZiftenAfterPatch) {
-                def ips = plainInstances*.localIp
                 sh('''\
                     #!/bin/bash
                     echo "[INFO] Starting Ziften services..."
                     salt -L $HOSTS -t 360 service.start ziften.target
                 '''.stripIndent())
-                waitZiftenIsUp(ips)
+                waitZiftenIsUp(plainInstances)
             }
         }
 
