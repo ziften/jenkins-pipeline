@@ -91,7 +91,7 @@ class DeploymentManager {
                 
                 hosts=${COMMA_SEPARATED_HOSTS//,/ }
                 ips=${COMMA_SEPARATED_IPS//,/ }
-                parallel -j0 -0 --link deploy_ziften ::: $hosts ::: $ips
+                parallel -j0 -0 --xapply deploy_ziften ::: $hosts ::: $ips
             '''.stripIndent())
         }
     }

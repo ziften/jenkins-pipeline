@@ -1,12 +1,12 @@
 import com.ziften.jenkins.DeploymentManager
 
-def call(installerDir, ... instances) {
+def call(Map opts, ... instances) {
     def plainInstances = instances.flatten()
     def manager = DeploymentManager.newInstance(this)
 
     node('AWS-pipe-slave') {
         manager.provisionKeys(plainInstances)
-        manager.copyInstaller(plainInstances, installerDir)
+        manager.copyInstaller(plainInstances, opts.installerDir)
         manager.deploy(plainInstances)
         waitZiftenIsUp(plainInstances)
         collectLogsFromInstances(plainInstances)

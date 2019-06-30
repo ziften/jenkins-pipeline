@@ -10,8 +10,8 @@ class ConfigureManager {
     def configureProperties(instances) {
         steps.withEnv(["COMMA_SEPARATED_IPS=${ipsStr(instances)}"]) {
             steps.sh('''
+                #!/bin/bash
                 configure_properties() {
-                    #!/bin/bash
                     ip=$1
                     
                     echo "[INFO] Stopping consumer on $ip"
@@ -29,7 +29,6 @@ class ConfigureManager {
                     ssh $ip "systemctl restart consumer; systemctl restart feed; systemctl restart binaryfile"
                     sleep 60
                 }
-                
                 export -f configure_properties
                 
                 ips=${COMMA_SEPARATED_IPS//,/ }
@@ -41,26 +40,26 @@ class ConfigureManager {
     def addTenant(instances, tenantName) {
         steps.withEnv(["COMMA_SEPARATED_IPS=${ipsStr(instances)}", "AUTOMATION_TENANT_NAME=${tenantName}"]) {
             steps.sh('''
+                #!/bin/bash
                 add_tenant() {
-                    #!/bin/bash
                     tenant_name=$1
                     ip=$2
                     
-                    automation_tenant_domain="${tenant_name}.ziften.local"
-                    automation_tenant_site_id=$(echo -n $automation_tenant_domain | md5sum | awk '{print $1}')
+                    domain="${tenant_name}.ziften.local"
+                    site_id=$(echo -n $domain | md5sum | awk '{print $1}')
                     
                     echo "[INFO] Adding custom tenant - $tenant_name"
-                    ssh $ip "source /root/.bash_profile && /opt/ziften/bin/ziften-cli.sh add-customer ${tenant_name} ${tenant_name} ${automation_tenant_site_id} no-dns"
+                    ssh $ip "source /root/.bash_profile && /opt/ziften/bin/ziften-cli.sh add-customer ${tenant_name} ${tenant_name} ${site_id} no-dns"
                     add_customer_exit_code=$?
                     if [ $add_customer_exit_code -gt 0 ]; then
                         echo "Error while adding tenant"
                         exit 1
                     fi
                     
-                    automation_tenant_domain_secondary="${tenant_name}_secondary.ziften.local"
-                    automation_tenant_site_id_secondary=$(echo -n $automation_tenant_domain_secondary | md5sum | awk '{print $1}')
-                    echo "[INFO] Adding secondary site ID - $automation_tenant_domain_secondary"
-                    ssh $ip "source /root/.bash_profile && /opt/ziften/bin/ziften-cli.sh add-secondary-siteids ${tenant_name} ${automation_tenant_site_id_secondary}"
+                    domain_secondary="${tenant_name}_secondary.ziften.local"
+                    site_id_secondary=$(echo -n $domain_secondary | md5sum | awk '{print $1}')
+                    echo "[INFO] Adding secondary site ID - $domain_secondary"
+                    ssh $ip "source /root/.bash_profile && /opt/ziften/bin/ziften-cli.sh add-secondary-siteids ${tenant_name} ${site_id_secondary}"
                     add_secondary_siteid_exit_code=$?
                     if [ $add_secondary_siteid_exit_code -gt 0 ]; then
                         echo "Error while adding secondary siteID"
@@ -71,7 +70,6 @@ class ConfigureManager {
                     ssh $ip "psql -U ziften -d ziften -c \\"UPDATE \\"global\\".\\"customers\\" SET \\"hostname\\"='\\`hostname\\`' WHERE \\"name\\"='$tenant_name'\\""
                     ssh $ip "systemctl restart alert-delivery"
                 }
-                
                 export -f add_tenant
                 
                 ips=${COMMA_SEPARATED_IPS//,/ }
