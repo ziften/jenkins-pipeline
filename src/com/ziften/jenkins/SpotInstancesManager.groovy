@@ -2,9 +2,11 @@ package com.ziften.jenkins
 
 class SpotInstancesManager {
     def steps
+    def utils
 
     SpotInstancesManager(steps) {
         this.steps = steps
+        this.utils = new PipelineUtils()
     }
 
     def createMany(number) {
@@ -55,11 +57,7 @@ class SpotInstancesManager {
     }
 
     private def generateHost() {
-        "dev-pipe-spot-${generateUUID()}"
-    }
-
-    private def generateUUID() {
-        UUID.randomUUID().toString()
+        "dev-pipe-spot-${utils.generateUUID()}"
     }
 
     private def prepareInstances(number) {

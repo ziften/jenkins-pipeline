@@ -153,3 +153,7 @@ def getSuccessfulBuildNumberByFilter(Map filter, String jobName) {
 
     build ? build.number : -1
 }
+
+def generateUUID() {
+    UUID.randomUUID().toString()
+}
