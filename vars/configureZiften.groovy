@@ -6,6 +6,6 @@ def call(Map opts, ... instances) {
 
     node('AWS-pipe-slave') {
         manager.configureProperties(plainInstances)
-        manager.addTenant(instances, opts.tenantName)
+        manager.addTenant(plainInstances, opts.tenantName)
     }
 }

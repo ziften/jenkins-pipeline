@@ -38,15 +38,15 @@ class AgentDataImportManager {
         steps.sh("""\
             #!/bin/bash
             # copy latest artifacts
-            csv_zip=${steps.env.WORKSPACE}/jmeter-agent-emulator/src/test/resources/csv.zip
+            csv_zip=jmeter-agent-emulator/src/test/resources/csv.zip
 
-            rm -rf ${steps.env.WORKSPACE}/csv/*
-            unzip \$csv_zip -d ${steps.env.WORKSPACE}
+            rm -rf csv/*
+            unzip \$csv_zip -d .
         """.stripIndent())
     }
 
-    def importData(Map opts, ... instances) {
-        env = ["COMMA_SEPARATED_IPS=${ipsStr(instances)}", "AUTOMATION_TENANT_NAME=${tenantName}",
+    def importData(Map opts, instances) {
+        def env = ["COMMA_SEPARATED_IPS=${ipsStr(instances)}", "AUTOMATION_TENANT_NAME=${opts.tenantName}",
                "THREADS=${opts.threads}", "AGENT_COUNT=${opts.agentCount}", "LOOPS=${opts.loops}"]
         steps.withEnv(env) {
             steps.sh('''\
@@ -55,7 +55,7 @@ class AgentDataImportManager {
                     tenant_name=$1
                     ip=$2
                     
-                    test_plan="./jmeter-agent-emulator/src/test/resources/testplan/ZiftenAgentsPatch.jmx"
+                    test_plan="jmeter-agent-emulator/src/test/resources/testplan/ZiftenAgentsPatch.jmx"
                     csvs="./csv"
                     threads=$THREADS
                     agent_count=$AGENT_COUNT
@@ -70,7 +70,7 @@ class AgentDataImportManager {
                     run_jmeter() {
                         export PATH=/etc/alternatives/jre_1.8.0/bin:$PATH
                         JMETER_HOME=/usr/local/apache-jmeter-3.2
-                        emulator_jar=$WORKSPACE/jmeter-agent-emulator/target/agent-emulator-0.0.1.jar
+                        emulator_jar=jmeter-agent-emulator/target/agent-emulator-0.0.1.jar
     
                         $JMETER_HOME/bin/jmeter.sh -n -t $test_plan -Jsearch_paths=$emulator_jar -JZIFTEN_SERVER=$ip -Jsite_id=$site_id -Jcsvs=$csvs -Jthreads=$threads -Jagent_count=$agent_count -Jloops=$loops -Jreport=jmeter_run.xml
                     }
