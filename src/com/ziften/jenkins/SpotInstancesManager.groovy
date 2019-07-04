@@ -31,10 +31,10 @@ class SpotInstancesManager {
     }
 
     def collectFileFromMany(instances, filepath) {
-        instances.each { collectFile(filepath, it) }
+        instances.each { collectFile(it, filepath) }
     }
 
-    def collectFile(filepath, instance) {
+    def collectFile(instance, filepath) {
         steps.sh("""\
             #!/bin/bash
             filename_with_ext=\$(basename ${filepath})
@@ -43,6 +43,14 @@ class SpotInstancesManager {
             
             echo "Pulling file from server: ${instance.externalIp}"
             scp -i /etc/salt/qa.pem -o StrictHostKeyChecking=no root@${instance.localIp}:${filepath} ${steps.env.WORKSPACE}/\${filename}_${instance.externalIp}.\${extension}
+        """.stripIndent())
+    }
+
+    def runCommand(instance, command) {
+        steps.sh("""\
+            #!/bin/bash
+            echo "Running command on ${instance.externalIp}: ${command}"
+            ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i /etc/salt/qa.pem root@${instance.localIp} "${command}"
         """.stripIndent())
     }
 
