@@ -44,7 +44,7 @@ class DeploymentManager {
                     ip=$2
                     
                     echo "[INFO] Fixing issue with firewalld service on CentOS 7.3"
-                    salt $host -t 600 cmd.run 'yum -y install firewalld\'
+                    salt $host -t 600 cmd.run 'yum -y install firewalld'
                     salt $host -t 120 system.reboot
                     count=0
                     while [ $count -lt 30 ]; do
@@ -94,6 +94,8 @@ class DeploymentManager {
                 parallel -j0 -0 --xapply deploy_ziften ::: $hosts ::: $ips
             '''.stripIndent())
         }
+
+        steps.waitZiftenIsUp(instances)
     }
 
     private def hostnamesStr(instances) {
