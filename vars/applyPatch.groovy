@@ -1,29 +1,12 @@
+import com.ziften.jenkins.PatchManager
+
 def call(Map opts, ... instances) {
+    def manager = PatchManager.newInstance(this)
+    def plainInstances = instances.flatten()
+
     node('master') {
-        copyArtifacts(filter: 'props', projectName: 'QA-SERVER-PreparePatch', selector: specific("${opts.preparePatchBuildNumber}"))
-        def plainInstances = instances.flatten()
-        def hostsStr = plainInstances*.hostname.join(',')
-        def props = readProperties(file: 'props', defaults: [HOSTS: hostsStr]).collect { k, v -> "${k}=${v}" }
-
-        withEnv(props) {
-            sh('''\
-                #!/bin/bash
-                echo "[INFO] Running patch on $HOSTS"
-                echo "[INFO] Started at: $(date)"
-                set -x
-                salt -L $HOSTS test.ping
-                salt -L $HOSTS -t 1500 state.sls server_patches.$PATCH_BASE_FOLDER.$(echo $FINAL_PATCH|sed 's/\\.sls//')
-            '''.stripIndent())
-            if (opts.startZiftenAfterPatch) {
-                sh('''\
-                    #!/bin/bash
-                    echo "[INFO] Starting Ziften services..."
-                    salt -L $HOSTS -t 360 service.start ziften.target
-                '''.stripIndent())
-                waitZiftenIsUp(plainInstances)
-            }
-        }
-
-        archiveArtifacts('props')
+        manager.applyPatchToMany(plainInstances,
+                patchProperties: opts.patchProperties,
+                startZiftenAfterPatch: opts.startZiftenAfterPatch)
     }
 }
