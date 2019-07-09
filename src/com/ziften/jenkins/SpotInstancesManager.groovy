@@ -42,16 +42,16 @@ class SpotInstancesManager {
             extension="\${filename_with_ext##*.}"
             
             echo "Pulling file from server: ${instance.externalIp}"
-            scp -i /etc/salt/qa.pem -o StrictHostKeyChecking=no root@${instance.localIp}:${filepath} ${steps.env.WORKSPACE}/\${filename}_${instance.externalIp}.\${extension}
+            scp -o StrictHostKeyChecking=no -i /etc/salt/qa.pem root@${instance.localIp}:${filepath} ${steps.env.WORKSPACE}/\${filename}_${instance.externalIp}.\${extension}
         """.stripIndent())
     }
 
     def runCommand(instance, command) {
-        steps.sh("""\
+        steps.echo("Running command on ${instance.localIp}: ${command}")
+        steps.sh(script: """\
             #!/bin/bash
-            echo "Running command on ${instance.externalIp}: ${command}"
-            ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i /etc/salt/qa.pem root@${instance.localIp} "${command}"
-        """.stripIndent())
+            ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR -i /etc/salt/qa.pem root@${instance.localIp} "${command}"
+        """.stripIndent(), returnStdout: true)
     }
 
     private def wrapInstance(localIp, externalIp, hostname) {
