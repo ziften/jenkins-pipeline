@@ -5,7 +5,10 @@ def call(Map opts, ... instances) {
     def manager = DeploymentManager.newInstance(this)
 
     manager.provisionKeys(plainInstances)
-    manager.copyInstaller(plainInstances, opts.installerDir)
+
+    node('master') {
+        manager.copyInstaller(plainInstances, opts.installerDir)
+    }
 
     try {
         manager.deploy(plainInstances)
@@ -15,5 +18,4 @@ def call(Map opts, ... instances) {
 
         throw e
     }
-    // TODO: add errors detection and process halt
 }
