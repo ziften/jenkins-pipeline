@@ -1,5 +1,5 @@
-import com.ziften.jenkins.Storage
+import com.ziften.jenkins.PersistentStorage
 
 def call(key) {
-    Storage.newInstance(this).getPersistentVar(key)
+    PersistentStorage.newInstance(this).getPersistentVar(key)
 }
