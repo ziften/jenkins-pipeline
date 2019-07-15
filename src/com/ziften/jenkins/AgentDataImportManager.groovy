@@ -12,7 +12,7 @@ class AgentDataImportManager {
                 branches: [[name: branch]],
                 doGenerateSubmoduleConfigurations: false,
                 extensions: [[$class: 'CloneOption',
-                        noTags: true,
+                        noTags: false,
                         reference: '',
                         shallow: true,
                         timeout: 10],
