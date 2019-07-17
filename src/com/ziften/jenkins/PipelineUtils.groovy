@@ -144,12 +144,17 @@ def jobDuration(String name) {
 }
 
 @NonCPS
-def getSuccessfulBuildNumberByFilter(Map filter, String jobName) {
+def getSuccessfulBuildByFilter(String jobName, Map filter) {
     def allBuilds = jenkins.model.Jenkins.instance.getItem(jobName).builds
-    def build = allBuilds.find {
-        it.buildVariableResolver.resolve(filter.parameterName) == filter.parameterValue &&
-                it.result == hudson.model.Result.SUCCESS
+    allBuilds.find { build ->
+        build.result == hudson.model.Result.SUCCESS &&
+                filter.keySet().every { key -> build.buildVariableResolver.resolve(key) == filter[key] }
     }
+}
+
+@NonCPS
+def getSuccessfulBuildNumberByFilter(Map filter, String jobName) {
+    def build = getSuccessfulBuildByFilter(jobName, filter)
 
     build ? build.number : -1
 }

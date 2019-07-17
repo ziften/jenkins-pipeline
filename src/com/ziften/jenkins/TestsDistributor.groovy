@@ -7,11 +7,14 @@ class TestsDistributor {
     private def tests
     private def result
     private def utils
+    private def pipeType
 
     final DEVIATION_MSEC = 30000
+    final DEFAULT_JOB_DURATION = 60
 
-    TestsDistributor() {
+    TestsDistributor(pipeType) {
         this.utils = new PipelineUtils()
+        this.pipeType = pipeType
     }
 
     @NonCPS
@@ -96,7 +99,13 @@ class TestsDistributor {
 
     @NonCPS
     private def jobWithDuration(name) {
-        [name: name, duration: utils.jobDuration(name)]
+        [name: name, duration: lastBuildDuration(name)]
+    }
+
+    @NonCPS
+    private def lastBuildDuration(jobName) {
+        def build = utils.getSuccessfulBuildByFilter(jobName, [PIPE_TYPE: pipeType])
+        build ? build.duration : DEFAULT_JOB_DURATION
     }
 
     @NonCPS

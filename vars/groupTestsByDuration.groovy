@@ -1,5 +1,7 @@
 import com.ziften.jenkins.TestsDistributor
 
 def call(jobs) {
-    TestsDistributor.newInstance().groupByDuration(jobs)
+    def pipeType = (env.PIPE_TYPE == 'DEVELOPMENT' || params.INSTALLER == 'USE_LATEST_DEVELOPMENT_INSTALLER') ? 'DEVELOPMENT' : 'RELEASE'
+
+    TestsDistributor.newInstance(pipeType).groupByDuration(jobs)
 }
