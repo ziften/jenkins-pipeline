@@ -37,6 +37,7 @@ class TestsDistributor {
         result
     }
 
+    @NonCPS
     def groupByInstances(jobs, instancesNumber) {
         this.tests = jobsWithDuration(jobs)
         this.result = []
