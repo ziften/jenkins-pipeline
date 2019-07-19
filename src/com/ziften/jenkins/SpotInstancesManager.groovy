@@ -35,23 +35,21 @@ class SpotInstancesManager {
     }
 
     def collectFile(instance, filepath) {
-        steps.sh("""\
+        steps.sh(script: """\
             #!/bin/bash
             filename_with_ext=\$(basename ${filepath})
             filename="\${filename_with_ext%.*}"
             extension="\${filename_with_ext##*.}"
             
-            echo "Pulling file from server: ${instance.externalIp}"
+            echo "Pulling '${filepath}' from server: ${instance.externalIp}"
             scp -o StrictHostKeyChecking=no -i /etc/salt/qa.pem root@${instance.localIp}:${filepath} ${steps.env.WORKSPACE}/\${filename}_${instance.externalIp}.\${extension}
-        """.stripIndent())
+        """.stripIndent(), label: 'Pulling file')
     }
 
     def runCommand(instance, command) {
         steps.echo("Running command on ${instance.localIp}: ${command}")
-        steps.sh(script: """\
-            #!/bin/bash
-            ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR -i /etc/salt/qa.pem root@${instance.localIp} "${command}"
-        """.stripIndent(), returnStdout: true)
+        steps.sh("ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR -i /etc/salt/qa.pem root@${instance.localIp} \"${command}\"",
+                returnStdout: true)
     }
 
     private def wrapInstance(localIp, externalIp, hostname) {
@@ -100,11 +98,11 @@ class SpotInstancesManager {
     }
 
     private def provisionInstances(hostnames) {
-        steps.sh("salt-cloud -P -p dev-pipe-spot ${hostnames.join(' ')}")
+        steps.sh(script: "salt-cloud -P -p dev-pipe-spot ${hostnames.join(' ')}", label: 'Provisioning instances')
     }
 
     private def initializeInstances(hostnames) {
-        steps.sh("salt -L '${hostnames.join(',')}' state.highstate saltenv=dev-pipe-spot")
+        steps.sh(script: "salt -L '${hostnames.join(',')}' state.highstate saltenv=dev-pipe-spot", label: 'Initializing instances')
     }
 
     private def getLocalIp(hostname) {
@@ -118,10 +116,10 @@ class SpotInstancesManager {
     private def destroyInstances(hostnames) {
         def hostnamesStr = hostnames.join(' ')
 
-        steps.sh("""\
+        steps.sh(script: """\
             #!/bin/bash
             echo "Killing VMs: ${hostnamesStr}"
             salt-cloud -y -d -P ${hostnamesStr}
-        """.stripIndent())
+        """.stripIndent(), label: 'Destroying instances')
     }
 }

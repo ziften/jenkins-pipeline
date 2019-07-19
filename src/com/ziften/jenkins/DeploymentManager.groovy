@@ -8,12 +8,12 @@ class DeploymentManager {
     }
 
     def provisionKeys(instances) {
-        steps.sh("salt -L '${hostnamesStr(instances)}' -t 600 state.sls soft_key saltenv=dev-pipe-spot")
+        steps.sh(script: "salt -L '${hostnamesStr(instances)}' -t 600 state.sls soft_key saltenv=dev-pipe-spot", label: 'Setup keys')
     }
 
     def copyInstaller(instances, installerDir) {
         steps.withEnv(["COMMA_SEPARATED_IPS=${ipsStr(instances)}", "INSTALLER_DIR=${installerDir}"]) {
-            steps.sh('''\
+            steps.sh(script: '''\
                 copyInstaller() {
                     installer_dir=$1
                     ip=$2
@@ -25,13 +25,13 @@ class DeploymentManager {
     
                 ips=${COMMA_SEPARATED_IPS//,/ }
                 parallel -j0 -0 copyInstaller ::: $INSTALLER_DIR ::: $ips
-            '''.stripIndent())
+            '''.stripIndent(), label: 'Copying installer to the instances')
         }
     }
 
     def deploy(instances) {
         steps.withEnv(["COMMA_SEPARATED_HOSTS=${hostnamesStr(instances)}", "COMMA_SEPARATED_IPS=${ipsStr(instances)}"]) {
-            steps.sh('''\
+            steps.sh(script: '''\
                 #!/bin/bash
                 deploy_ziften() {
                     echo "#######################################"
@@ -92,7 +92,7 @@ class DeploymentManager {
                 hosts=${COMMA_SEPARATED_HOSTS//,/ }
                 ips=${COMMA_SEPARATED_IPS//,/ }
                 parallel -j0 -0 --xapply deploy_ziften ::: $hosts ::: $ips
-            '''.stripIndent())
+            '''.stripIndent(), label: 'Deploying Ziften')
         }
 
         steps.waitZiftenIsUp(instances)

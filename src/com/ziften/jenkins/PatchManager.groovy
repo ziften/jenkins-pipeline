@@ -9,7 +9,7 @@ class PatchManager {
 
     def copyPatchFiles() {
         steps.withEnv(["WORKSPACE=${steps.env.WORKSPACE}"]) {
-            steps.sh('''\
+            steps.sh(script: '''\
                 #!/bin/bash
                 PFILE_DIR=$WORKSPACE/patches
                 PATCH_DIR=$PFILE_DIR/files
@@ -29,7 +29,7 @@ class PatchManager {
                         cp -v $line
                     done < <(cat $PFILE_DIR/patch_files.txt|sed -e 's/^.//1' -e "s|/opt/ziften/|$PATCH_DIR/|g" -e 's/*//2' -e 's|/$||')
                 fi
-            '''.stripIndent())
+            '''.stripIndent(), label: 'Gathering patch files together in patch dir')
         }
 
         steps.archiveArtifacts('patches/**')
@@ -44,7 +44,7 @@ class PatchManager {
                             BUILD_DIR: "${steps.env.JENKINS_HOME}/jobs/${steps.env.JOB_NAME}/builds/${steps.env.BUILD_NUMBER}"]
         def env = steps.readProperties(file: 'props', defaults: defaultProps).collect { k, v -> "${k}=${v}" }
         steps.withEnv(env) {
-            steps.sh('''\
+            steps.sh(script: '''\
                 #!/bin/bash
                 FEATURE_BRANCH=$(echo ${SERVER_BRANCH}|sed 's/\\//-/g')
                 BUILD_MAJ=$(echo $SERVER_VERSION|sed 's/\\./_/g')
@@ -91,7 +91,7 @@ class PatchManager {
                 echo "PATCH_BASE_FOLDER=$PATCH_BASE_FOLDER" >> $WORKSPACE/props
                 echo "PATCH_FILES_FOLDER=$M_DATE-$FEATURE_BRANCH/files" >> $WORKSPACE/props
                 echo "FINAL_PATCH=$FINAL_PATCH" >> $WORKSPACE/props
-            '''.stripIndent())
+            '''.stripIndent(), label: 'Preparing patch')
         }
 
         steps.readProperties(file: 'props')
@@ -103,20 +103,20 @@ class PatchManager {
         def env = props.collect { k, v -> "${k}=${v}" }
 
         steps.withEnv(env) {
-            steps.sh('''\
+            steps.sh(script: '''\
                 #!/bin/bash
                 echo "[INFO] Running patch on $HOSTS"
                 echo "[INFO] Started at: $(date)"
                 set -x
                 salt -L $HOSTS test.ping
                 salt -L $HOSTS -t 1500 state.sls server_patches.$PATCH_BASE_FOLDER.$(echo $FINAL_PATCH|sed 's/\\.sls//')
-            '''.stripIndent())
+            '''.stripIndent(), label: 'Applying patch')
             if (opts.startZiftenAfterPatch) {
-                steps.sh('''\
+                steps.sh(script: '''\
                     #!/bin/bash
                     echo "[INFO] Starting Ziften services..."
                     salt -L $HOSTS -t 360 service.start ziften.target
-                '''.stripIndent())
+                '''.stripIndent(), label: 'Starting Ziften services')
                 steps.waitZiftenIsUp(instances)
             }
         }

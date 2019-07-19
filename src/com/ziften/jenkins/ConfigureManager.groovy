@@ -9,7 +9,7 @@ class ConfigureManager {
 
     def configureProperties(instances) {
         steps.withEnv(["COMMA_SEPARATED_IPS=${ipsStr(instances)}"]) {
-            steps.sh('''
+            steps.sh(script: '''
                 #!/bin/bash
                 configure_properties() {
                     ip=$1
@@ -33,13 +33,13 @@ class ConfigureManager {
                 
                 ips=${COMMA_SEPARATED_IPS//,/ }
                 parallel -j0 -0 configure_properties ::: $ips
-            '''.stripIndent())
+            '''.stripIndent(), label: 'Adjusting Ziften properties')
         }
     }
 
     def addTenant(instances, tenantName) {
         steps.withEnv(["COMMA_SEPARATED_IPS=${ipsStr(instances)}", "AUTOMATION_TENANT_NAME=${tenantName}"]) {
-            steps.sh('''
+            steps.sh(script: '''
                 #!/bin/bash
                 add_tenant() {
                     tenant_name=$1
@@ -74,7 +74,7 @@ class ConfigureManager {
                 
                 ips=${COMMA_SEPARATED_IPS//,/ }
                 parallel -j0 -0 add_tenant ::: $AUTOMATION_TENANT_NAME ::: $ips
-            '''.stripIndent())
+            '''.stripIndent(), label: "Adding new tenant: ${tenantName}")
         }
     }
 

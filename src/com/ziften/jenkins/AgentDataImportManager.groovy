@@ -49,7 +49,7 @@ class AgentDataImportManager {
         def env = ["COMMA_SEPARATED_IPS=${ipsStr(instances)}", "AUTOMATION_TENANT_NAME=${opts.tenantName}",
                "THREADS=${opts.threads}", "AGENT_COUNT=${opts.agentCount}", "LOOPS=${opts.loops}"]
         steps.withEnv(env) {
-            steps.sh('''\
+            steps.sh(script: '''\
                 #!/bin/bash
                 run_and_validate() (
                     tenant_name=$1
@@ -125,7 +125,7 @@ class AgentDataImportManager {
     
                 ips=${COMMA_SEPARATED_IPS//,/ }
                 parallel -j0 -0 run_and_validate ::: $AUTOMATION_TENANT_NAME ::: $ips
-            '''.stripIndent())
+            '''.stripIndent(), label: 'Importing agents data')
         }
     }
 
