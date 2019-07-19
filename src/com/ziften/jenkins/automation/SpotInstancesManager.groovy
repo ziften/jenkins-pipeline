@@ -1,4 +1,6 @@
-package com.ziften.jenkins
+package com.ziften.jenkins.automation
+
+import com.ziften.jenkins.PipelineUtils
 
 class SpotInstancesManager {
     def steps

@@ -1,4 +1,4 @@
-import com.ziften.jenkins.TestsManager
+import com.ziften.jenkins.automation.TestsManager
 
 def call(Map opts, instance, cukeProfile) {
     def manager = TestsManager.newInstance(this)

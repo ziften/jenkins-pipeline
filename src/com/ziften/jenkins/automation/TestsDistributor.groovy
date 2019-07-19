@@ -1,7 +1,8 @@
-package com.ziften.jenkins
+package com.ziften.jenkins.automation
 
 @Grab('com.google.guava:guava:24.1-jre')
 import com.google.common.collect.Sets
+import com.ziften.jenkins.PipelineUtils
 
 class TestsDistributor {
     private def tests

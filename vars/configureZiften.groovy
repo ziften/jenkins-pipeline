@@ -1,4 +1,4 @@
-import com.ziften.jenkins.ConfigureManager
+import com.ziften.jenkins.automation.ConfigureManager
 
 def call(Map opts, ... instances) {
     def plainInstances = instances.flatten()

@@ -1,4 +1,4 @@
-import com.ziften.jenkins.TestsReportBuilder
+import com.ziften.jenkins.automation.TestsReportBuilder
 
 def call(statuses, chatId) {
     def reportsBuilder = new TestsReportBuilder()

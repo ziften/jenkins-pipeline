@@ -1,4 +1,4 @@
-import com.ziften.jenkins.AgentDataImportManager
+import com.ziften.jenkins.automation.AgentDataImportManager
 
 def call(Map opts, ... instances) {
     def plainInstances = instances.flatten()

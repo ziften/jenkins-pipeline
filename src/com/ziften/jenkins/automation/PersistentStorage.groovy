@@ -1,4 +1,4 @@
-package com.ziften.jenkins
+package com.ziften.jenkins.automation
 
 class PersistentStorage {
     static final FILE_STORAGE = 'global_storage.json'

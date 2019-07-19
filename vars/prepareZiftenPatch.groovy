@@ -1,4 +1,4 @@
-import com.ziften.jenkins.PatchManager
+import com.ziften.jenkins.automation.PatchManager
 
 def call(Map opts) {
     def manager = PatchManager.newInstance(this)

@@ -1,4 +1,4 @@
-import com.ziften.jenkins.SpotInstancesManager
+import com.ziften.jenkins.automation.SpotInstancesManager
 
 def call(number) {
     def manager = SpotInstancesManager.newInstance(this)
