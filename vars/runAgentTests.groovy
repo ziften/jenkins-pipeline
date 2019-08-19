@@ -4,6 +4,6 @@ def call(Map opts) {
     def manager = TestsManager.newInstance(this)
 
     node('AWS-pipe-slave') {
-        manager.run(opts)
+        manager.runWithAgents(opts)
     }
 }
