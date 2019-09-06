@@ -1,53 +1,76 @@
 package com.ziften.jenkins.automation
 
 class ReportBuilder {
-    def build(tests) {
-        def elements = []
-        elements << headerRows(tests)
-        elements << bodyRows(tests)
+    class Report {
+        def message
+        def status
+        def color
 
-        asPreformatted(elements.join())
-    }
-
-    private def headerRows(tests) {
-
-    }
-
-    private def bodyRows(tests) {
-        tests.collect { rowForStatus(it) }
-    }
-
-    private def rowForStatus(test) {
-        def content
-        if (test.status == 'SUCCESS') {
-            content = successRow(test.title)
-        } else if (test.status == 'FAILURE') {
-            content = failureRow(test.title)
-        } else {
-            content = undefinedRow(test.title)
+        Report(message, status) {
+            this.message = message
+            this.status = status
+            this.color = color(status)
         }
 
-        asDiv(content)
+        private def color(status) {
+            if (status == 'SUCCESS') {
+                'Green'
+            } else if (status == 'FAILURE') {
+                'Red'
+            } else {
+                'Blue'
+            }
+        }
     }
 
-    private def successRow(testsName) {
-        "✅ ${testsName}"
+    def build(Map opts = [:], results) {
+        def message = prepareMessage(results)
+        def status = prepareStatus(results)
+
+        new Report(message, status)
     }
 
-    private def failureRow(testsName) {
-        "❌ ${testsName}"
+    private def prepareMessage(results) {
+        def rows = results.collect { rowForResult(it) }
+        asPreformatted(rows.join())
     }
 
-    private def undefinedRow(testsName) {
-        "❔ ${testsName}"
+    def prepareStatus(results) {
+        if (results.every { it.status == 'SUCCESS' }) {
+            'SUCCESS'
+        } else {
+            'FAILURE'
+        }
+    }
+
+    private def rowForResult(result) {
+        asDiv(resultDescription(result))
+    }
+
+    private def resultDescription(result) {
+        if (result.status == 'SUCCESS') {
+            successRow(result.title)
+        } else if (result.status == 'FAILURE') {
+            failureRow(result.title)
+        } else {
+            undefinedRow(result.title)
+        }
+    }
+
+    private def successRow(testsTitle) {
+        "✅ ${testsTitle}"
+    }
+
+    private def failureRow(testsTitle) {
+        "❌ ${testsTitle}"
+    }
+
+    private def undefinedRow(testsTitle) {
+        "❔ ${testsTitle}"
     }
 
     private def asDiv(text) {
         "<div>${text}</div>"
-    }
-
-    private def asParagraph(text) {
-        "<p>${text}</p>"
     }
 
     private def asPreformatted(text) {
