@@ -4,11 +4,7 @@ def call(Map opts) {
 
     deployZiften(instance, installerDir: opts.installerDir)
     configureZiften(instance, tenantName: opts.tenantName)
-    node('AWS-CentOS_7-DEV01') {
-        dir('agent-data-import') {
-            importAgentData(instance, branch: opts.automationBranch, tenantName: opts.tenantName)
-        }
-    }
+    importAgentData(instance, branch: opts.automationBranch, tenantName: opts.tenantName)
 
     return instance
 }

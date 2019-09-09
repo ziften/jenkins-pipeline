@@ -64,7 +64,7 @@ class AgentDataImportManager {
                     domain="${tenant_name}.ziften.local"
                     site_id=$(echo -n $domain | md5sum | awk '{print $1}')
                     
-                    echo "Munging to '${tenant_name}' tenant"
+                    echo "Munging to '${tenant_name}' tenant on ${ip}"
                     insert_dir="insert_${site_id}"
     
                     run_jmeter() {
