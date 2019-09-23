@@ -26,7 +26,7 @@ class PatchManager {
     
                     # Copy patch files to patch directory
                     while read line; do
-                        cp -v $line
+                        cp -rv $line
                     done < <(cat $PFILE_DIR/patch_files.txt|sed -e 's/^.//1' -e "s|/opt/ziften/|$PATCH_DIR/|g" -e 's/*//2' -e 's|/$||')
                 fi
             '''.stripIndent(), label: 'Gathering patch files together in patch dir')
