@@ -1,14 +1,12 @@
 package com.ziften.jenkins.automation
 
-import com.ziften.jenkins.PipelineUtils
-
 class TestsManager {
     def steps
     def utils
 
     TestsManager(steps) {
         this.steps = steps
-        this.utils = new PipelineUtils()
+        this.utils = new JobUtils()
     }
 
     def run(opts) {

@@ -2,7 +2,6 @@ package com.ziften.jenkins.automation
 
 @Grab('com.google.guava:guava:24.1-jre')
 import com.google.common.collect.Sets
-import com.ziften.jenkins.PipelineUtils
 
 class TestsDistributor {
     private def tests
@@ -14,7 +13,7 @@ class TestsDistributor {
     final DEFAULT_JOB_DURATION = 60
 
     TestsDistributor(pipeType) {
-        this.utils = new PipelineUtils()
+        this.utils = new JobUtils()
         this.pipeType = pipeType
     }
 

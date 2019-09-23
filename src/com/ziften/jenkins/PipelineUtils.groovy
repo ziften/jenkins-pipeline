@@ -137,28 +137,3 @@ def helmDeploy(Map args) {
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }
 }
-
-@NonCPS
-def jobDuration(String name) {
-    jenkins.model.Jenkins.instance.getItem(name).getEstimatedDuration()
-}
-
-@NonCPS
-def getSuccessfulBuildByFilter(String jobName, Map filter) {
-    def allBuilds = jenkins.model.Jenkins.instance.getItem(jobName).builds
-    allBuilds.find { build ->
-        build.result == hudson.model.Result.SUCCESS &&
-                filter.keySet().every { key -> build.buildVariableResolver.resolve(key) == filter[key] }
-    }
-}
-
-@NonCPS
-def getSuccessfulBuildNumberByFilter(Map filter, String jobName) {
-    def build = getSuccessfulBuildByFilter(jobName, filter)
-
-    build ? build.number : -1
-}
-
-def generateUUID() {
-    UUID.randomUUID().toString()
-}

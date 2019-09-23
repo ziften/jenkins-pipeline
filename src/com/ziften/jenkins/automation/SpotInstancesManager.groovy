@@ -1,14 +1,12 @@
 package com.ziften.jenkins.automation
 
-import com.ziften.jenkins.PipelineUtils
-
 class SpotInstancesManager {
     def steps
     def utils
 
     SpotInstancesManager(steps) {
         this.steps = steps
-        this.utils = new PipelineUtils()
+        this.utils = new JobUtils()
     }
 
     def createMany(number) {
