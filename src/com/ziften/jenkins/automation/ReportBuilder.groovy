@@ -5,9 +5,9 @@ class ReportBuilder {
     def build(Map opts = [:], results) {
         def message = prepareMessage(results)
         def status = prepareStatus(results)
-        def color = color(status)
+        def color = prepareColor(status)
 
-        [message: message, status: status.name(), color: color]
+        [message: message, status: status.toString(), color: color]
     }
 
     @NonCPS
@@ -18,10 +18,21 @@ class ReportBuilder {
 
     @NonCPS
     def prepareStatus(results) {
-        if (results.every { it.status.isSuccess() }) {
-            BuildStatus.SUCCESS
+        if (results.every { it.status == hudson.model.Result.SUCCESS }) {
+            hudson.model.Result.SUCCESS
         } else {
-            BuildStatus.FAILURE
+            hudson.model.Result.FAILURE
+        }
+    }
+
+    @NonCPS
+    private def prepareColor(status) {
+        if (status == hudson.model.Result.SUCCESS) {
+            'Green'
+        } else if (status == hudson.model.Result.FAILURE) {
+            'Red'
+        } else {
+            'Blue'
         }
     }
 
@@ -32,28 +43,26 @@ class ReportBuilder {
 
     @NonCPS
     private def resultDescription(result) {
-        if (result.status.isSuccess()) {
-            successRow(result.title)
-        } else if (result.status.isFailure()) {
-            failureRow(result.title)
+        def description = titleAsUrl(result)
+        def icon = iconForStatus(result.status)
+
+        "${icon} ${description}"
+    }
+
+    @NonCPS
+    private def iconForStatus(status) {
+        if (status == hudson.model.Result.SUCCESS) {
+            '✅'
+        } else if (status == hudson.model.Result.FAILURE) {
+            '❌'
         } else {
-            undefinedRow(result.title)
+            '❔'
         }
     }
 
     @NonCPS
-    private def successRow(testsTitle) {
-        "✅ ${testsTitle}"
-    }
-
-    @NonCPS
-    private def failureRow(testsTitle) {
-        "❌ ${testsTitle}"
-    }
-
-    @NonCPS
-    private def undefinedRow(testsTitle) {
-        "❔ ${testsTitle}"
+    private def titleAsUrl(result) {
+        "<a href=\"${result.url}\">${result.title}</a>"
     }
 
     @NonCPS
@@ -64,16 +73,5 @@ class ReportBuilder {
     @NonCPS
     private def asPreformatted(text) {
         "<pre>${text}</pre>"
-    }
-
-    @NonCPS
-    private def color(status) {
-        if (status.isSuccess()) {
-            'Green'
-        } else if (status.isFailure()) {
-            'Red'
-        } else {
-            'Blue'
-        }
     }
 }
