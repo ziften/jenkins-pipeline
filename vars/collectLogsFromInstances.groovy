@@ -12,7 +12,7 @@ def call(... instances) {
                 entries: [[bucket: 'ziften-jenkins-artifacts-dev',
                            sourceFile: "ziften_*.log",
                            selectedRegion: 'us-east-1',
-                           noUploadOnFailure: true,
+                           noUploadOnFailure: false,
                            uploadFromSlave: true,
                            managedArtifacts: true,
                            useServerSideEncryption: false,
