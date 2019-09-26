@@ -48,7 +48,7 @@ class SpotInstancesManager {
 
     def runCommand(instance, command) {
         steps.echo("Running command on ${instance.localIp}: ${command}")
-        steps.sh("ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR -i /etc/salt/qa.pem root@${instance.localIp} \"${command}\"",
+        steps.sh(script: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR -i /etc/salt/qa.pem root@${instance.localIp} \"${command}\"",
                 returnStdout: true)
     }
 
