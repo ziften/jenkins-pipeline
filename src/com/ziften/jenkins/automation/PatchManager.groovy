@@ -39,7 +39,8 @@ class PatchManager {
         steps.sh('rm -f props')
 
         steps.copyArtifacts(filter: 'props', projectName: 'QA-SERVER-CodeBuild', selector: steps.specific("${opts.codeBuildNumber}"))
-        def defaultProps = [STAGING_DIR: opts.stagingDir,
+        steps.echo "[DEBUG] PREVIOUS_RELEASE_DIR 3: ${steps.env.PREVIOUS_RELEASE_DIR}"
+        def defaultProps = [PREVIOUS_RELEASE_DIR: steps.env.PREVIOUS_RELEASE_DIR,
                             WORKSPACE: steps.env.WORKSPACE,
                             BUILD_DIR: "${steps.env.JENKINS_HOME}/jobs/${steps.env.JOB_NAME}/builds/${steps.env.BUILD_NUMBER}"]
         def env = steps.readProperties(file: 'props', defaults: defaultProps).collect { k, v -> "${k}=${v}" }
@@ -51,7 +52,7 @@ class PatchManager {
                 M_DATE=$(echo ${BUILD_DATE}|sed 's/-//g')
                 PFILE_DIR=$BUILD_DIR/archive/patches
                 NEWTON_DIR=/srv/salt/server_patches/$M_DATE-$(echo $FEATURE_BRANCH|sed 's/\\./_/g')-${BUILD_MAJ}_$BUILD_NUMBER
-                RELEASE_VERSION_FULL=$(ls -1 ${STAGING_DIR}/JAR|awk -F'_' '{print $4}')
+                RELEASE_VERSION_FULL=$(echo $PREVIOUS_RELEASE_DIR|awk -F'-' '{gsub(/_/, ".", $4); print $4}')
                 RELEASE_VERSION=$(echo $RELEASE_VERSION_FULL|sed 's/\\(.*\\)\\..*/\\1/')
                 RELEASE_BUILD=$(echo $RELEASE_VERSION_FULL|awk -F'.' '{print $NF}')
                 FINAL_PATCH=$RELEASE_BUILD-$BUILD_NUMBER

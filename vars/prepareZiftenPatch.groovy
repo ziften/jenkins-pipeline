@@ -8,6 +8,6 @@ def call(Map opts) {
     }
 
     node('master') {
-        manager.preparePatch(codeBuildNumber: opts.codeBuildNumber, stagingDir: opts.stagingDir)
+        manager.preparePatch(opts)
     }
 }
