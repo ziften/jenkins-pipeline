@@ -2,34 +2,32 @@ package com.ziften.jenkins.automation
 
 class ReportBuilder {
     @NonCPS
-    def build(Map opts = [:], results) {
+    def build(results, overallStatus) {
         def message = prepareMessage(results)
-        def status = prepareStatus(results)
-        def color = prepareColor(status)
+        def color = prepareColor(overallStatus)
 
-        [message: message, status: status.toString(), color: color]
+        [message: message, status: overallStatus, color: color]
     }
 
     @NonCPS
     private def prepareMessage(results) {
-        def rows = results.sort { it.title }.collect { rowForResult(it) }
-        asPreformatted(rows.join())
-    }
-
-    @NonCPS
-    def prepareStatus(results) {
-        if (results.every { it.status == hudson.model.Result.SUCCESS }) {
-            hudson.model.Result.SUCCESS
-        } else {
-            hudson.model.Result.FAILURE
+        if (!results) {
+            return ''
         }
+
+        def groups = results.groupBy({ it.group }).collect { key, value ->
+            def rows = value.sort { it.title }.collect { rowForResult(it) }
+            asGroup(rows.join(), key)
+        }
+
+        asPreformatted(groups.join())
     }
 
     @NonCPS
     private def prepareColor(status) {
-        if (status == hudson.model.Result.SUCCESS) {
+        if (status == 'SUCCESS') {
             'Green'
-        } else if (status == hudson.model.Result.FAILURE) {
+        } else if (status == 'FAILURE') {
             'Red'
         } else {
             'Blue'
@@ -51,9 +49,9 @@ class ReportBuilder {
 
     @NonCPS
     private def iconForStatus(status) {
-        if (status == hudson.model.Result.SUCCESS) {
+        if (status == 'SUCCESS') {
             '✅'
-        } else if (status == hudson.model.Result.FAILURE) {
+        } else if (status == 'FAILURE') {
             '❌'
         } else {
             '❔'
@@ -62,7 +60,16 @@ class ReportBuilder {
 
     @NonCPS
     private def titleAsUrl(result) {
-        "<a href=\"${result.url}\">${result.title}</a>"
+        if (result.url) {
+            "<a href=\"${result.url}\">${result.title}</a>"
+        } else {
+            result.title
+        }
+    }
+
+    @NonCPS
+    private def asGroup(rowsHtml, groupCaption) {
+        "<div>${groupCaption}:</div>" + rowsHtml
     }
 
     @NonCPS

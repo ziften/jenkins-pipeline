@@ -2,7 +2,7 @@ import com.ziften.jenkins.automation.ReportBuilder
 
 def call(results) {
     def reportsBuilder = new ReportBuilder()
-    def report = reportsBuilder.build(results)
+    def report = reportsBuilder.build(results, currentBuild.currentResult)
 
     withCredentials([string(credentialsId: 'teams-webhook_qa-automation', variable: 'TEAMS_WEBHOOK')]) {
         office365ConnectorSend(
