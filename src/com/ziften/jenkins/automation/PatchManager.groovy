@@ -115,10 +115,10 @@ class PatchManager {
             if (opts.startZiftenAfterPatch) {
                 steps.sh(script: '''\
                     #!/bin/bash
-                    echo "[INFO] Starting Ziften services..."
-                    salt -L $HOSTS -t 180 service.start ziften.target
+                    echo "[INFO] Restarting Ziften services..."
+                    salt -L $HOSTS -t 180 service.restart ziften.target
                 '''.stripIndent(), label: 'Starting Ziften services')
-                steps.waitZiftenIsUp(instances)
+                steps.waitZiftenIsUp(instances, timeout: 240)
             }
         }
 
