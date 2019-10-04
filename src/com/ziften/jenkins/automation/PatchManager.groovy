@@ -116,7 +116,7 @@ class PatchManager {
                 steps.sh(script: '''\
                     #!/bin/bash
                     echo "[INFO] Starting Ziften services..."
-                    salt -L $HOSTS -t 360 service.start ziften.target
+                    salt -L $HOSTS -t 180 service.start ziften.target
                 '''.stripIndent(), label: 'Starting Ziften services')
                 steps.waitZiftenIsUp(instances)
             }
