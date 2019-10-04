@@ -14,16 +14,19 @@ class SpotInstancesManager {
 
 //        fixDeadInstances(hosts)
 
-        hosts.collect { wrapInstance(getLocalIp(it), getExternalIp(it), it) }
+        def instances = hosts.collect { wrapInstance(getLocalIp(it), getExternalIp(it), it) }
+        steps.echo(instancesInfo(instances))
+
+        return instances
+    }
+
+    def createOne() {
+        createMany(1).first()
     }
 
     def destroyMany(instances) {
         def hosts = instances*.hostname
         destroyInstances(hosts)
-    }
-
-    def createOne() {
-        createMany(1).first()
     }
 
     def collectLogsFromMany(instances) {
@@ -75,7 +78,7 @@ class SpotInstancesManager {
         hosts
     }
 
-    private fixDeadInstances(hosts) {
+    private def fixDeadInstances(hosts) {
         def deadHosts = selectDeadHosts(hosts)
 
         if (deadHosts) {
@@ -121,5 +124,9 @@ class SpotInstancesManager {
             echo "Killing VMs: ${hostnamesStr}"
             salt-cloud -y -d -P ${hostnamesStr}
         """.stripIndent(), label: 'Destroying instances')
+    }
+
+    private def instancesInfo(instances) {
+        "Instances: ${instances.collect { "${it.externalIp} (${it.hostname})" }.join(', ') }"
     }
 }
