@@ -29,7 +29,11 @@ class AgentDataImportManager {
 
     def build() {
         steps.echo('Building JMeter project')
-        steps.withMaven(maven: 'maven') {
+        steps.withMaven(maven: 'maven', options: [
+                steps.artifactsPublisher(disabled: true),
+                steps.junitPublisher(disabled: true),
+                steps.openTasksPublisher(disabled: true)
+        ]) {
             steps.sh('mvn -f jmeter-agent-emulator/pom.xml clean package')
         }
     }
