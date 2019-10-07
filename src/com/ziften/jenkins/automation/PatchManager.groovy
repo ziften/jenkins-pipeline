@@ -121,7 +121,5 @@ class PatchManager {
                 steps.waitZiftenIsUp(instances, timeout: 240)
             }
         }
-
-        steps.archiveArtifacts('props')
     }
 }
