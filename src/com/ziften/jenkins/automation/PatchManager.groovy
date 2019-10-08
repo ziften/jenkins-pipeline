@@ -39,7 +39,6 @@ class PatchManager {
         steps.sh('rm -f props')
 
         steps.copyArtifacts(filter: 'props', projectName: 'QA-SERVER-CodeBuild', selector: steps.specific("${opts.codeBuildNumber}"))
-        steps.echo "[DEBUG] PREVIOUS_RELEASE_DIR 3: ${steps.env.PREVIOUS_RELEASE_DIR}"
         def defaultProps = [PREVIOUS_RELEASE_DIR: steps.env.PREVIOUS_RELEASE_DIR,
                             WORKSPACE: steps.env.WORKSPACE,
                             BUILD_DIR: "${steps.env.JENKINS_HOME}/jobs/${steps.env.JOB_NAME}/builds/${steps.env.BUILD_NUMBER}"]
