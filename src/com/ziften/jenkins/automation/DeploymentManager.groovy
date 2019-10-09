@@ -65,8 +65,8 @@ class DeploymentManager {
                     salt $host -t 3600 cmd.script salt://files/qa_install_automation.sh saltenv=dev-pipe-spot runas=root shell=/bin/bash
     
                     salt $host cmd.run "sed -i 's/log\\.retention\\.hours.*/log\\.retention\\.hours=24/g' /opt/ziften/kafka/config/server.properties"
-                    salt $host cmd.run "sed -i 's/knowledgecloud-52\\.cloud\\.ziften\\.com/172.16.9.85/g' /opt/ziften/etc/systemd/agent.service; systemctl daemon-reload"
-                    salt $host cmd.run "sed -i 's/ZIFTEN_CLOUD_SERVICE_URL=.*/ZIFTEN_CLOUD_SERVICE_URL=https:\\/\\/172.16.9.85/g' /opt/ziften/zlabmq.settings"
+                    salt $host cmd.run "sed -i 's/knowledgecloud-52\\.cloud\\.ziften\\.com/172.16.9.142/g' /opt/ziften/etc/systemd/agent.service; systemctl daemon-reload"
+                    salt $host cmd.run "sed -i 's/ZIFTEN_CLOUD_SERVICE_URL=.*/ZIFTEN_CLOUD_SERVICE_URL=https:\\/\\/172.16.9.142/g' /opt/ziften/zlabmq.settings"
                     salt $host cmd.run "systemctl restart scheduler &"
     
                     MC_PASSWORD=$(salt $host cmd.run "grep MCZIFTENPASSWORD /opt/ziften/zlabmq.settings"|tail -1|awk -F'=' '{print $NF}')
