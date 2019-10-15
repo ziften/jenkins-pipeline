@@ -59,11 +59,8 @@ class SpotInstancesManager {
         def result = steps.sh(script: "salt --out yaml --static -L ${instances*.hostname.join(',')} test.ping", returnStdout: true)
         def aliveInstances = steps.readYaml(text: result).keySet()
 
-        steps.echo("[DEBUG] alive instances: ${aliveInstances}")
-        steps.echo("[DEBUG] all instances: ${instances*.hostname}")
-
         instances.findAll { instance ->
-            !aliveInstances.contains(instance.hostname)
+            !aliveInstances.contains(instance.hostname.toString())
         }
     }
 
