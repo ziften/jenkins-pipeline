@@ -15,12 +15,12 @@ class TestsDistributor {
     TestsDistributor(pipeType) {
         this.utils = new JobUtils()
         this.pipeType = pipeType
+        this.result = []
     }
 
     @NonCPS
     def groupByDuration(jobs) {
         this.tests = jobsWithDuration(jobs)
-        this.result = []
 
         def longestTest = longestTest()
 
@@ -40,7 +40,6 @@ class TestsDistributor {
     @NonCPS
     def groupByInstances(jobs, instancesNumber) {
         this.tests = jobsWithDuration(jobs)
-        this.result = []
 
         instancesNumber.times { idx ->
             if (idx + 1 == instancesNumber) {

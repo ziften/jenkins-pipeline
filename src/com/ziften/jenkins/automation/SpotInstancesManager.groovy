@@ -55,6 +55,18 @@ class SpotInstancesManager {
                 returnStdout: true)
     }
 
+    def selectDeadInstances(instances) {
+        def result = steps.sh(script: "salt --out yaml --static -L ${instances*.hostname.join(',')} test.ping", returnStdout: true)
+        def aliveInstances = steps.readYaml(text: result).keySet()
+
+        steps.echo("[DEBUG] alive instances: ${aliveInstances}")
+        steps.echo("[DEBUG] all instances: ${instances*.hostname}")
+
+        instances.findAll { instance ->
+            !aliveInstances.contains(instance.hostname)
+        }
+    }
+
     private def wrapInstance(localIp, externalIp, hostname) {
         new SpotInstance(localIp: localIp, externalIp: externalIp, hostname: hostname)
     }
@@ -127,6 +139,6 @@ class SpotInstancesManager {
     }
 
     private def instancesInfo(instances) {
-        "Instances: ${instances.collect { "${it.externalIp} (${it.hostname})" }.join(', ') }"
+        "Instances: ${instances.collect { "${it.externalIp} (${it.localIp}, ${it.hostname})" }.join(', ') }"
     }
 }
