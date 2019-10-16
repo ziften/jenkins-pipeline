@@ -7,10 +7,8 @@ def call(filepath, ... instances) {
     node('AWS-pipe-slave') {
         manager.collectFileFromMany(instances.flatten(), filepath)
 
-        def filename = FileUtils.filename(filepath)
-        def extension = FileUtils.extension(filepath)
-
-        archiveArtifacts("${filename}_*.${extension}")
-        sh("rm -f ${filename}_*.${extension}")
+        def filename = FileUtils.basename(filepath)
+        archiveArtifacts("*_${filename}")
+        sh("rm -f *_${filename}")
     }
 }

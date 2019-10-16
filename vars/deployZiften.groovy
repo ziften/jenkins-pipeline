@@ -10,12 +10,14 @@ def call(Map opts, ... instances) {
         manager.copyInstaller(plainInstances, opts.installerDir)
     }
 
-    try {
-        manager.deploy(plainInstances)
-    } catch(e) {
-        collectLogsFromInstances(plainInstances)
-        copyFileFromInstances('/var/log/ZiftenInstallation.log', plainInstances)
+    node('AWS-pipe-slave') {
+        try {
+            manager.deploy(plainInstances)
+        } catch(e) {
+            collectLogsFromInstances(plainInstances)
+            copyFileFromInstances('/var/log/ZiftenInstallation.log', plainInstances)
 
-        throw e
+            throw e
+        }
     }
 }

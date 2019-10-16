@@ -34,7 +34,25 @@ class SpotInstancesManager {
     }
 
     def collectFileFromMany(instances, filepath) {
-        instances.each { collectFile(it, filepath) }
+        def privateIps = instances*.localIp.join(',')
+        def publicIps = instances*.externalIp.join(',')
+        steps.withEnv(["COMMA_SEPARATED_PRIVATE_IPS=${privateIps}", "COMMA_SEPARATED_PUBLIC_IPS=${publicIps}", "FILEPATH=${filepath}", "WORKSPACE=${steps.env.WORKSPACE}"]) {
+            steps.sh(script: '''\
+                collectFile() {
+                    private_ip=$1
+                    public_ip=$2
+                    filename=$(basename ${FILEPATH})
+
+                    echo "Pulling '${FILEPATH}' from: ${public_ip}"
+                    scp -o StrictHostKeyChecking=no -i /etc/salt/qa.pem root@${private_ip}:${FILEPATH} ${WORKSPACE}/${public_ip}_${filename}
+                }
+                export -f collectFile
+    
+                private_ips=${COMMA_SEPARATED_PRIVATE_IPS//,/ }
+                public_ips=${COMMA_SEPARATED_PUBLIC_IPS//,/ }
+                parallel -j0 -0 collectFile ::: $private_ips ::: $public_ips
+            '''.stripIndent(), label: "Copying ${filepath} from the instances")
+        }
     }
 
     def collectFile(instance, filepath) {
@@ -42,10 +60,10 @@ class SpotInstancesManager {
             #!/bin/bash
             filename_with_ext=\$(basename ${filepath})
             filename="\${filename_with_ext%.*}"
-            extension="\${filename_with_ext##*.}"
+            extension=".\${filename_with_ext##*.}"
             
             echo "Pulling '${filepath}' from server: ${instance.externalIp}"
-            scp -o StrictHostKeyChecking=no -i /etc/salt/qa.pem root@${instance.localIp}:${filepath} ${steps.env.WORKSPACE}/\${filename}_${instance.externalIp}.\${extension}
+            scp -o StrictHostKeyChecking=no -i /etc/salt/qa.pem root@${instance.localIp}:${filepath} ${steps.env.WORKSPACE}/\${filename}_${instance.externalIp}\${extension}
         """.stripIndent(), label: 'Pulling file')
     }
 
