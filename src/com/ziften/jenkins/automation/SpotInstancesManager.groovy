@@ -50,7 +50,7 @@ class SpotInstancesManager {
     
                 private_ips=${COMMA_SEPARATED_PRIVATE_IPS//,/ }
                 public_ips=${COMMA_SEPARATED_PUBLIC_IPS//,/ }
-                parallel -j0 -0 collectFile ::: $private_ips ::: $public_ips
+                parallel -j0 -0 --xapply collectFile ::: $private_ips ::: $public_ips
             '''.stripIndent(), label: "Copying ${filepath} from the instances")
         }
     }
